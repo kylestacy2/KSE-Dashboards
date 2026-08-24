@@ -1,0 +1,22 @@
+# This repository publishes only the two KSE dashboard variants.
+/*
+!/.gitignore
+!/KSE4/
+!/KSE5/
+
+# KSE4 release source
+/KSE4/*
+!/KSE4/main.lua
+!/KSE4/default.png
+!/KSE4/BatterySounds/
+/KSE4/BatterySounds/*
+!/KSE4/BatterySounds/*.wav
+
+# KSE5 release source
+/KSE5/*
+!/KSE5/main.lua
+!/KSE5/default.png
+!/KSE5/default1.png
+!/KSE5/BatterySounds/
+/KSE5/BatterySounds/*
+!/KSE5/BatterySounds/*.wav
