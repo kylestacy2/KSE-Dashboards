@@ -9,6 +9,7 @@
 /KSE4/*
 !/KSE4/main.lua
 !/KSE4/default.png
+!/KSE4/default1.png
 !/KSE4/BatterySounds/
 /KSE4/BatterySounds/*
 !/KSE4/BatterySounds/*.wav

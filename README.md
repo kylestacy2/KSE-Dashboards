@@ -15,8 +15,8 @@ Each widget folder contains:
 
 - `main.lua` — the EdgeTX widget source.
 - `default.png` — the supplied fallback model image.
+- `default1.png` — an alternate fallback image supplied with both widgets.
 - `BatterySounds/` — battery percentage announcements and the repeating critical-battery warning.
-- KSE5 also includes `default1.png` as an additional supplied image.
 
 This repository intentionally does **not** distribute compiled `main.luac` files. If an older installation has a `main.luac`, delete it before installing this source version so EdgeTX cannot run stale compiled code instead of the new `main.lua`.
 
@@ -225,6 +225,14 @@ Image: /IMAGES/Goblin RAW.png
 ```
 
 Characters that are unsuitable for filenames are replaced with underscores. For example, `Goblin/RAW` uses `/IMAGES/Goblin_RAW.png`.
+
+Both KSE4 and KSE5 also include `default1.png` as an alternate fallback image. The widgets load `default.png`, so to use the alternate image:
+
+1. Back up or rename the existing `default.png`.
+2. Rename `default1.png` to `default.png` inside the selected KSE4 or KSE5 folder.
+3. Restart EdgeTX or reload the widget.
+
+The filename must be exactly `default.png`; leaving the alternate image named `default1.png` will not change the displayed fallback.
 
 ## Troubleshooting
 
