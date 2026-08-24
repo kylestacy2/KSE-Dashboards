@@ -249,7 +249,7 @@ The filename must be exactly `default.png`; leaving the alternate image named `d
 | Rotorflight FC count is unavailable | Confirm RF Tool 2.3, the `ARM` sensor, enabled Rotorflight model statistics, a disarmed model, and the complete `/SCRIPTS/RF2/` directory. |
 | Nitro battery is missing | Nitro uses `Vbec`; it does not load a battery profile. |
 | Model image is missing | Match the EdgeTX model name and `/IMAGES/` filename, including capitalization. |
-| Telemetry fields show `--` or `NO DATA` | Re-discover sensors and confirm the exact case-sensitive names above. |
+| Telemetry fields show `--` or `NO DATA` | Re-discover sensors and confirm the exact case-sensitive names above. If needed, try pasting the CLI command above for telemetry sensors. |
 
 ## Source and updates
 
