@@ -221,7 +221,14 @@ The OMPHOBBY model name should contain `M1` or `M2` so the widget can derive the
 
 ## Model images
 
-The supplied `default.png` is used when no model-specific image is found. For a custom image, place a PNG or BMP in `/IMAGES/` using the EdgeTX model name as the filename:
+The supplied `default.png` is used when no model-specific image is found. Custom and replacement KSE images must meet both of these limits:
+
+- Maximum dimensions: **480 × 272 pixels**.
+- Maximum file size: **100 KB**.
+
+Smaller images are acceptable and will be scaled to fit the available image area. Do not use an image that exceeds either limit; oversized images consume additional radio memory and may reduce interface performance or fail to load reliably.
+
+For a custom image, place a PNG or BMP in `/IMAGES/` using the EdgeTX model name as the filename:
 
 ```text
 Model name: Goblin RAW
