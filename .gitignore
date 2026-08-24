@@ -1,6 +1,7 @@
 # This repository publishes only the two KSE dashboard variants.
 /*
 !/.gitignore
+!/README.md
 !/KSE4/
 !/KSE5/
 
