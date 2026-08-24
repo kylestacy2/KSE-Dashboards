@@ -254,3 +254,7 @@ The filename must be exactly `default.png`; leaving the alternate image named `d
 ## Source and updates
 
 KSE4 and KSE5 are maintained together so functional and safety changes can be applied to both variants. The repository publishes readable Lua source rather than a precompiled radio-specific artifact.
+
+## Disclaimer
+
+Use these dashboards entirely at your own risk. They are provided as-is, without warranties or guarantees of any kind. The author assumes zero liability for injury, crashes, loss of a model, property damage, data loss, incorrect telemetry, missed or incorrect warnings, configuration errors, software failure, or any other direct or indirect consequence arising from their installation, use, or misuse. You are solely responsible for verifying your radio, model, telemetry, alarms, motor safety, and failsafe configuration and for performing appropriate motor-disabled bench testing before flight.
