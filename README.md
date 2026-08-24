@@ -22,7 +22,11 @@ This repository intentionally does **not** distribute compiled `main.luac` files
 
 ## Requirements
 
-- A color transmitter running EdgeTX with LVGL widget support.
+- One of these supported RadioMaster transmitters running EdgeTX:
+  - RadioMaster TX15
+  - RadioMaster GX15
+  - RadioMaster TX16S MKII
+  - RadioMaster TX16S MK3
 - A correctly configured Rotorflight helicopter or supported OMPHOBBY model.
 - Discovered telemetry sensors using the names listed below.
 - The complete official Rotorflight 2.3 EdgeTX Lua package for RF Tool features.
