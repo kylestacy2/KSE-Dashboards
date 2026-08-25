@@ -2,10 +2,12 @@
 /*
 !/.gitignore
 !/README.md
-!/KSE_FUTURE_WIDGET_IMPLEMENTATION_BLUEPRINT.md
 !/flights-count.csv
 !/KSE4/
 !/KSE5/
+
+# Local future-widget design/reference document; do not publish.
+/KSE_FUTURE_WIDGET_IMPLEMENTATION_BLUEPRINT.md
 
 # KSE4 release source
 /KSE4/*
