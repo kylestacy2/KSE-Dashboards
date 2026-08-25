@@ -5,7 +5,7 @@ KSE4 and KSE5 are full-screen EdgeTX telemetry dashboards for RC helicopters. Th
 - **KSE4** uses the original information-dense dashboard with a large theme selection.
 - **KSE5** uses the newer ring-style dashboard with a smaller, curated theme selection.
 
-Choose the version whose layout you prefer. Both versions can be installed on the same radio, but only one needs to be added to a telemetry screen.
+Choose the version whose layout you prefer. Both versions can be installed on the same radio, but only one needs to be added to a telemetry screen. Do not have multiple screens setup at one time, please choose one or the other when setting up your screen. Using them at the same time on separate can create issues and cause your radio to go into Emergency Mode.
 
 > **Safety:** These widgets are informational aids. They do not replace correctly configured radio alarms, motor safety, telemetry-loss warnings, or failsafe settings. Bench-test a new installation with the motor physically unable to start before flying.
 
@@ -18,17 +18,17 @@ Each widget folder contains:
 - `default1.png` — an alternate fallback image supplied with both widgets.
 - `BatterySounds/` — battery percentage announcements and the repeating critical-battery warning.
 
-The repository root also includes `flights-count.csv`, the starter file for users who select the KSE Counter.
+The repository root also includes `flights-count.csv`, the starter file for users who select the KSE Counter. It needs to live at the root of your SD card if you want to use the built in KSE Counter.
 
 This repository intentionally does **not** distribute compiled `main.luac` files. If an older installation has a `main.luac`, delete it before installing this source version so EdgeTX cannot run stale compiled code instead of the new `main.lua`.
 
 ## Requirements
 
 - One of these supported RadioMaster transmitters running EdgeTX:
-  - RadioMaster TX15
-  - RadioMaster GX15
-  - RadioMaster TX16S MKII
-  - RadioMaster TX16S MK3
+  - RadioMaster TX15/MAX
+  - RadioMaster GX15/MAX
+  - RadioMaster TX16S MKII/MAX
+  - RadioMaster TX16S MK3/MAX
 - A correctly configured Rotorflight helicopter or supported OMPHOBBY model.
 - Discovered telemetry sensors using the names listed below.
 - The complete official Rotorflight 2.3 EdgeTX Lua package for RF Tool features.
@@ -87,7 +87,7 @@ Power the helicopter, establish the receiver/FC connection, and discover telemet
 
 ### 5. Add the widget
 
-Add `KSE4` or `KSE5` to an EdgeTX telemetry screen. Full-screen use is recommended. Open the widget settings and configure the helicopter type, transmitter battery type, Motor Switch, flight counter, and battery options.
+Add `KSE4` or `KSE5` to an EdgeTX telemetry screen. Full-screen use is recommended and turn off trim sliders, top bar, etc. Open the widget settings and configure the helicopter type, transmitter battery type, Motor Switch, flight counter, and battery options.
 
 ### 6. Bench test
 
@@ -99,6 +99,7 @@ With the motor disconnected or otherwise physically unable to start, verify:
 - The top bar shows the active PID and rate profiles while connected and clears them after disconnect.
 - Electric battery-profile changes are blocked while armed, while the governor is running, or while headspeed is present.
 - The selected flight counter updates according to its documented behavior.
+- Confirm that Timer1 is setup with the motor switch - this is configured in EdgeTX completely separate from KSE Dashboard.
 
 ## RF Tool behavior by model type
 
@@ -110,7 +111,6 @@ With the motor disconnected or otherwise physically unable to start, verify:
 | Nitro + Rotorflight counter | Yes | No | Yes | Yes |
 | OMPHOBBY + KSE Counter | No | No | No | No |
 | OMPHOBBY + Rotorflight counter | Yes | No | No | Yes |
-| Sim Preview | No | No | No | Simulated only |
 
 Normal dashboard telemetry comes directly from EdgeTX telemetry sensors. RF Tool is used for the additional FC-side operations shown above.
 
@@ -126,7 +126,6 @@ Profile 5 / Rate 6
 - `Rate` is the active rate profile reported by the `RTE#` telemetry sensor.
 - The indicator appears only while the telemetry link is live and both values are valid whole numbers from 1 through 6.
 - It clears when the link disconnects or either sensor is missing or invalid.
-- Sim Preview displays `Profile 1 / Rate 1` using simulated values.
 
 This indicator is display-only. It reads normal EdgeTX telemetry and does not add MSP traffic, change a profile, or bypass the existing battery-profile safety checks. The active battery profile from `BAT#` remains with the battery display: inside KSE5's battery ring and above KSE4's battery bar.
 
@@ -155,7 +154,7 @@ KSE4 provides these ten settings:
 | **Rx Pack Minimum** | 6.60 | Nitro receiver-pack voltage represented as 0%. Valid minimum is at least 4.0 V. |
 | **Rx Pack Maximum** | 8.40 | Nitro receiver-pack voltage represented as 100%. Valid maximum is no more than 9.0 V and must be at least 0.1 V above the minimum. |
 | **Motor Switch** | SG | Select the whole physical motor switch, such as `SG`, not an individual position condition or output channel. The widget detects switch movement and validates stopped/running state with current aircraft telemetry. |
-| **Flight Counter** | Rotorflight FC | `KSE Counter` uses Timer 1 and `/flights-count.csv`; `Rotorflight FC` reads the FC's persistent qualified-flight total through RF Tool; `Sim Preview` displays synthetic values for layout review and does not use live RF Tool or telemetry. |
+| **Flight Counter** | Rotorflight FC | `KSE Counter` uses Timer 1 and `/flights-count.csv`; `Rotorflight FC` reads the FC's persistent qualified-flight total through RF Tool. |
 
 ## KSE5 settings
 
@@ -172,7 +171,7 @@ KSE5 provides the same functional settings with a different Theme list:
 | **Rx Pack Minimum** | 6.60 | Nitro receiver-pack voltage represented as 0%. Valid minimum is at least 4.0 V. |
 | **Rx Pack Maximum** | 8.40 | Nitro receiver-pack voltage represented as 100%. Valid maximum is no more than 9.0 V and must be at least 0.1 V above the minimum. |
 | **Motor Switch** | SG | Select the whole physical motor switch, such as `SG`, not an individual position condition or output channel. The widget detects switch movement and validates stopped/running state with current aircraft telemetry. |
-| **Flight Counter** | RotorFlight | `KSE Counter` uses Timer 1 and `/flights-count.csv`; `RotorFlight` reads the FC's persistent qualified-flight total through RF Tool; `Sim Preview` displays synthetic values for layout review and does not use live RF Tool or telemetry. |
+| **Flight Counter** | RotorFlight | `KSE Counter` uses Timer 1 and `/flights-count.csv`; `RotorFlight` reads the FC's persistent qualified-flight total through RF Tool. |
 
 ## Flight-counter setup
 
