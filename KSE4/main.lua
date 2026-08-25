@@ -2938,7 +2938,7 @@ local function buildModelPanel()
   })
   lvgl.hline({ x=p.x + G.x(8), y=p.y + imgH,
                w=p.w - G.x(16), h=1, color=C_LINE })
-  V.flightCount = newLabel(p.x, p.y + p.h - footerH + G.y(5), p.w, "",
+  V.flightCount = newLabel(p.x, p.y + p.h - footerH + G.y(5) - 2, p.w, "",
                            G.fontSmall, C_TEXT, CENTERED)
 end
 
