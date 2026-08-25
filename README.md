@@ -206,6 +206,17 @@ The displayed FC total represents Rotorflight-qualified arm/disarm cycles. Multi
 
 Sensor names are case-sensitive. Discover telemetry while the receiver and FC are connected.
 
+### Rotorflight telemetry CLI setup
+
+To ensure the correct telemetry sensors are enabled, connect the flight controller to RF Configurator, open the CLI, and paste these two lines:
+
+```text
+set telemetry_sensors = 43,60,61,89,88,93,15,3,4,5,6,7,8,95,96,97,90,91,92,99,42,46,50,17,18,19,20,21,22,23,24,25,27,28,30,31,32,33,41,36
+save
+```
+
+After the controller saves and reconnects, return to the model's Telemetry page on the radio and discover sensors again so any newly enabled sensors are added.
+
 ### Common sensors
 
 | Sensor | Purpose |
