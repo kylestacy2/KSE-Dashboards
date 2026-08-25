@@ -248,14 +248,15 @@ After the controller saves and reconnects, return to the model's Telemetry page 
 
 | Sensor | Purpose |
 | --- | --- |
-| `NR` | Main rotor speed and stopped-rotor proof. |
-| `RxBt` | Flight-pack voltage. |
-| `Curr` | Current. |
-| `Capa` | Used capacity. |
+| `RPM` | Headspeed and stopped-rotor proof. |
 | `Bat%` | Battery percentage. |
-| `Tmp` | Temperature. |
+| `Capa` | Battery capacity consumed in mAh. |
+| `Curr` | Current in amps. |
+| `RxBt` | Flight-pack battery voltage. |
 
-The OMPHOBBY model name should contain `M1` or `M2` so the widget can derive the expected cell count. OMPHOBBY mode does not use tail-RPM, governor, BEC, or Rotorflight battery-profile telemetry.
+These five case-sensitive sensors are the required OMPHOBBY telemetry contract. `Temp` remains optional and supplies temperature when it is discovered. The OMPHOBBY model name should contain `M1` or `M2` so the widget can derive the expected battery type: `M1` is treated as a 2S LiHV pack with a 4.35 V/cell full scale (8.7 V pack), while `M2` is treated as 3S. OMPHOBBY mode does not use tail-RPM, governor, BEC, or Rotorflight battery-profile telemetry.
+
+> **OFS3 firmware requirement:** When using OMPHOBBY mode with OFS3 firmware, ExpressLRS (ELRS) firmware **3.5.6 or newer** is required. This minimum-version requirement does **not** apply to OFS3+ firmware.
 
 ## Model images
 

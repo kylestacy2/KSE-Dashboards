@@ -415,8 +415,8 @@ local SAFETY = {
   electricMotorZeroConfirmTicks = 30, -- require 0.3s of displayed-zero Hspd
   electricMotorRunningRpm = 1, -- raw Hspd below 1 RPM matches displayed zero
   ompMotorStopWindowTicks = 3000, -- allow a 30s autorotation/spindown
-  ompMotorZeroConfirmTicks = 30,   -- require 0.3s of current displayed-zero NR
-  ompMotorRunningRpm = 1, -- raw NR below 1 RPM matches the displayed zero state
+  ompMotorZeroConfirmTicks = 30,   -- require 0.3s of displayed-zero RPM telemetry
+  ompMotorRunningRpm = 1, -- raw RPM below 1 matches the displayed zero state
 }
 -- Source metadata distinguishes a missing zero from a live value. This matters
 -- most for Smart Fuel: Bat%=0 is meaningful only when a flight pack is actually
@@ -538,7 +538,7 @@ local function applyOptions(opts)
   SRC.motorSwitch = defaultMotorSwitch
   if opts then
     -- The Motor Switch is the only mapped source. Rotorflight Gov/Hspd or OMP
-    -- NR telemetry validates what a movement means; other sensors auto-detect.
+    -- RPM telemetry validates what a movement means; other sensors auto-detect.
     SRC.motorSwitch = opts.MotorSw or opts["Motor Switch"]
                       or defaultMotorSwitch
     -- Heli Type CHOICE (1-based): Electric=1, Nitro=2, OMPHOBBY=3.
@@ -748,12 +748,12 @@ local ROTORFLIGHT_SENSOR = {
   packVoltage      = "Vbat",
 }
 local OMPHOBBY_SENSOR = {
-  headspeed        = "NR",
+  headspeed        = "RPM",
   packVoltage      = "RxBt",
   current          = "Curr",
   capacity         = "Capa",
   batteryPercent   = "Bat%",
-  escTemperature   = "Tmp",
+  escTemperature   = "Temp",
 }
 local function activeSensorName(key)
   local sensors = OPT.heliType == HELI_OMPHOBBY
@@ -797,12 +797,16 @@ local function getCellCount()
   if v ~= nil then return v end
   if OPT.heliType == HELI_OMPHOBBY then
     -- OMP receivers do not stream cell count. Model names containing M2 are
-    -- 3S; names containing M1 are 2S. Match case-insensitively anywhere.
+    -- 3S; names containing M1 are 2S LiHV (8.5-8.7 V fully charged). Match
+    -- case-insensitively anywhere and make the M1 chemistry deterministic
+    -- instead of waiting for a high-voltage sample to identify it.
     local modelName = string.upper(getModelName())
     if string.find(modelName, "M2", 1, true) then
       v = 3
     elseif string.find(modelName, "M1", 1, true) then
       v = 2
+      D.isLiHV = true
+      A.liHvHighSamples = SAFETY.liHvConfirmSamples
     else
       v = 0
     end
@@ -1581,7 +1585,7 @@ local function tick(nowT)
                          * SAFETY.displayPercentAlpha
   end
   -- A raw switch move is never enough to silence a warning. Rotorflight must
-  -- corroborate it with Gov or Hspd; OMPHOBBY uses stopped NR.
+  -- corroborate it with Gov or Hspd; OMPHOBBY uses stopped RPM telemetry.
   updateMotorAlertGate(nowT, governorMode, headRpm)
   -- Percentage voice/haptic alerts belong to the main flight pack shown by
   -- Electric and OMPHOBBY modes. Nitro displays an Rx-pack voltage bar, so it
@@ -1977,7 +1981,7 @@ local function updateOmpMotorGate(now, position, headRpm)
             or A.motorGateCandidateTo ~= position) then
       clearMotorGateCandidate()
     end
-    -- Running NR can persist during rotor coast-down. Do not relabel the new
+    -- Running RPM telemetry can persist during rotor coast-down. Do not relabel the new
     -- switch position as running while a valid stop candidate is pending.
     if A.motorGateCandidateTick == nil then
       A.ompGateRunningPosition = position
