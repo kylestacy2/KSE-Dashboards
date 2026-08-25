@@ -114,7 +114,6 @@ With the motor disconnected or otherwise physically unable to start, verify:
 | Nitro + KSE Counter | Yes | No | Yes | No |
 | Nitro + Rotorflight counter | Yes | No | Yes | Yes |
 | OMPHOBBY + KSE Counter | No | No | No | No |
-| OMPHOBBY + Rotorflight counter | Yes | No | No | Yes |
 
 Normal dashboard telemetry comes directly from EdgeTX telemetry sensors. RF Tool is used for the additional FC-side operations shown above.
 
