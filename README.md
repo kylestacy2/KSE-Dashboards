@@ -208,9 +208,11 @@ Sensor names are case-sensitive. Discover telemetry while the receiver and FC ar
 
 ### Rotorflight telemetry CLI setup
 
-To ensure the correct telemetry sensors are enabled, connect the flight controller to RF Configurator, open the CLI, and paste these two lines:
+To ensure the correct telemetry sensors are enabled, connect the flight controller to RF Configurator, open the CLI, and paste these four lines:
 
 ```text
+feature TELEMETRY
+set crsf_telemetry_mode = CUSTOM
 set telemetry_sensors = 43,60,61,89,88,93,15,3,4,5,6,7,8,95,96,97,90,91,92,99,42,46,50,17,18,19,20,21,22,23,24,25,27,28,30,31,32,33,41,36
 save
 ```
