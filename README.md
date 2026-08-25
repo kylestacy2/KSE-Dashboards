@@ -1,6 +1,6 @@
 # KSE Dashboards for EdgeTX
 
-KSE4 and KSE5 are full-screen EdgeTX telemetry dashboards for RC helicopters. They provide the same core flight information, alerts, top-bar battery/profile indication, battery-profile support, Rotorflight diagnostics, and flight-counter choices. The main difference is the dashboard layout and visual style:
+KSE4 and KSE5 are full-screen EdgeTX telemetry dashboards for RC helicopters. They provide the same core flight information, alerts, top-bar PID/rate-profile indication, battery-profile support, Rotorflight diagnostics, and flight-counter choices. The main difference is the dashboard layout and visual style:
 
 - **KSE4** uses the original information-dense dashboard with a large theme selection.
 - **KSE5** uses the newer ring-style dashboard with a smaller, curated theme selection.
@@ -17,6 +17,8 @@ Each widget folder contains:
 - `default.png` — the supplied fallback model image.
 - `default1.png` — an alternate fallback image supplied with both widgets.
 - `BatterySounds/` — battery percentage announcements and the repeating critical-battery warning.
+
+The repository root also includes `flights-count.csv`, the starter file for users who select the KSE Counter.
 
 This repository intentionally does **not** distribute compiled `main.luac` files. If an older installation has a `main.luac`, delete it before installing this source version so EdgeTX cannot run stale compiled code instead of the new `main.lua`.
 
@@ -71,6 +73,8 @@ KSE5 -> /WIDGETS/KSE5/
 
 Keep `main.lua`, the image files, and the complete `BatterySounds` folder together. Do not rename the KSE4 or KSE5 folder because the widget uses absolute paths for its images and sounds.
 
+If you plan to use **KSE Counter**, also copy the repository's `flights-count.csv` to the root of the transmitter SD card as `/flights-count.csv`. Both dashboards share that one file and store counts by model name. The Rotorflight FC counter does not use it.
+
 You may install both folders if you want to compare the two layouts on the radio.
 
 ### 3. Remove stale compiled files
@@ -92,7 +96,7 @@ With the motor disconnected or otherwise physically unable to start, verify:
 - Live telemetry appears and disappears correctly with the FC connection.
 - The selected Motor Switch is the actual physical switch.
 - Battery warnings and haptics behave as expected.
-- The top bar shows the active battery and PID/profile banks while connected and clears them after disconnect.
+- The top bar shows the active PID and rate profiles while connected and clears them after disconnect.
 - Electric battery-profile changes are blocked while armed, while the governor is running, or while headspeed is present.
 - The selected flight counter updates according to its documented behavior.
 
@@ -110,25 +114,25 @@ With the motor disconnected or otherwise physically unable to start, verify:
 
 Normal dashboard telemetry comes directly from EdgeTX telemetry sensors. RF Tool is used for the additional FC-side operations shown above.
 
-### Top-bar battery/profile indicator
+### Top-bar PID/rate-profile indicator
 
-KSE4 and KSE5 show the active battery profile and PID/profile bank together in the top bar:
+KSE4 and KSE5 show the active PID profile and rate profile together in the top bar:
 
 ```text
-Batt 3 / Bank 5
+Profile 5 / Rate 6
 ```
 
-- `Batt` is the active battery profile reported by the `BAT#` telemetry sensor.
-- `Bank` is the active PID/profile bank reported by the `PID#` telemetry sensor.
+- `Profile` is the active PID profile reported by the `PID#` telemetry sensor.
+- `Rate` is the active rate profile reported by the `RTE#` telemetry sensor.
 - The indicator appears only while the telemetry link is live and both values are valid whole numbers from 1 through 6.
 - It clears when the link disconnects or either sensor is missing or invalid.
-- Sim Preview displays `Batt 1 / Bank 1` using simulated values.
+- Sim Preview displays `Profile 1 / Rate 1` using simulated values.
 
-This indicator is display-only. It reads normal EdgeTX telemetry and does not add MSP traffic, change a profile, or bypass the existing battery-profile safety checks. The battery-profile number was removed from the battery footer so it is shown in one consistent location.
+This indicator is display-only. It reads normal EdgeTX telemetry and does not add MSP traffic, change a profile, or bypass the existing battery-profile safety checks. The active battery profile from `BAT#` remains with the battery display: inside KSE5's battery ring and above KSE4's battery bar.
 
 ### Electric battery profiles
 
-Battery profiles are available only in Electric mode. After RF Tool connects, KSE reads the active Rotorflight battery profile and all six configured capacities. If exactly one profile has a positive configured capacity, KSE can select it automatically.
+Battery profiles are available only in Electric mode. After RF Tool connects, KSE reads the active Rotorflight battery profile and all six configured capacities. The picker lists only profiles with a positive configured capacity; zero-capacity profiles are treated as not configured. If no profiles are configured, the picker reports that instead of offering an invalid choice. If exactly one profile has a positive configured capacity, KSE can select it automatically.
 
 A profile change is permitted only when the model is disarmed, the governor is stopped, and headspeed is zero. KSE writes the requested profile, reads it back from the FC, and saves it to FC memory before displaying it as confirmed.
 
@@ -144,14 +148,14 @@ KSE4 provides these ten settings:
 | --- | --- | --- |
 | **Theme** | Dark | Selects the KSE4 color palette. Choices: Dark, Light, Transparent, Orange, Red, Blue, Pink, Green, Purple, Reef, Royal, Ember, Graphite, Glacier, Sunset, Synthwave, Gulf, Voltage, Transparent Light, Titanium Ember, Aurora, and Desert Night. This changes presentation only. |
 | **TX Battery** | LiPo | Selects the voltage mapping for the transmitter battery gauge: 2S LiPo or 2S Li-Ion. It does not affect the helicopter battery calculation. |
-| **Min. Flight Time (sec)** | 60 | Minimum Timer 1 elapsed time required by the KSE Counter. It does not change Rotorflight FC's own minimum armed-time setting. |
+| **KSE Counter Min (sec)** | 20 | Minimum Timer 1 elapsed time required by the KSE Counter. It does not change Rotorflight FC's own minimum armed-time setting. |
 | **Heli Type** | Electric | Selects Electric, Nitro, or OMPHOBBY telemetry and battery behavior. Electric supports Rotorflight battery profiles; Nitro uses receiver-pack voltage and has no battery profiles; OMPHOBBY uses its own telemetry names. |
 | **Batt Reserve %** | 20 | Re-scales Electric and OMPHOBBY flight-pack percentage so the selected reserve is displayed as 0%. Range: 0–50%. It does not affect Nitro. |
 | **Battery Voice** | Off | Enables the supplied percentage announcements for Electric/OMPHOBBY and critical `dead.wav` warnings. Safety haptics can still operate independently. |
 | **Rx Pack Minimum** | 6.60 | Nitro receiver-pack voltage represented as 0%. Valid minimum is at least 4.0 V. |
 | **Rx Pack Maximum** | 8.40 | Nitro receiver-pack voltage represented as 100%. Valid maximum is no more than 9.0 V and must be at least 0.1 V above the minimum. |
-| **Motor Switch** | Unset | Select the whole physical motor switch, such as `SG`, not an individual position condition or output channel. The widget detects switch movement and validates stopped/running state with current aircraft telemetry. |
-| **Flight Counter** | KSE Counter | `KSE Counter` uses Timer 1 and `/flights-count.csv`; `Rotorflight FC` reads the FC's persistent qualified-flight total through RF Tool; `Sim Preview` displays synthetic values for layout review and does not use live RF Tool or telemetry. |
+| **Motor Switch** | SG | Select the whole physical motor switch, such as `SG`, not an individual position condition or output channel. The widget detects switch movement and validates stopped/running state with current aircraft telemetry. |
+| **Flight Counter** | Rotorflight FC | `KSE Counter` uses Timer 1 and `/flights-count.csv`; `Rotorflight FC` reads the FC's persistent qualified-flight total through RF Tool; `Sim Preview` displays synthetic values for layout review and does not use live RF Tool or telemetry. |
 
 ## KSE5 settings
 
@@ -161,14 +165,14 @@ KSE5 provides the same functional settings with a different Theme list:
 | --- | --- | --- |
 | **Theme** | Dark | Selects Dark, Light, Arctic Blue, Midnight Violet, or Orange. This changes presentation only. |
 | **TX Battery** | LiPo | Selects the voltage mapping for the transmitter battery gauge: 2S LiPo or 2S Li-Ion. It does not affect the helicopter battery calculation. |
-| **Min. Flight Time (sec)** | 60 | Minimum Timer 1 elapsed time required by the KSE Counter. It does not change Rotorflight FC's own minimum armed-time setting. |
+| **KSE Counter Min (sec)** | 20 | Minimum Timer 1 elapsed time required by the KSE Counter. It does not change Rotorflight FC's own minimum armed-time setting. |
 | **Heli Type** | Electric | Selects Electric, Nitro, or OMPHOBBY telemetry and battery behavior. Electric supports Rotorflight battery profiles; Nitro uses receiver-pack voltage and has no battery profiles; OMPHOBBY uses its own telemetry names. |
 | **Battery Reserve %** | 20 | Re-scales Electric and OMPHOBBY flight-pack percentage so the selected reserve is displayed as 0%. Range: 0–50%. It does not affect Nitro. |
 | **Battery Voice** | Off | Enables the supplied percentage announcements for Electric/OMPHOBBY and critical `dead.wav` warnings. Safety haptics can still operate independently. |
 | **Rx Pack Minimum** | 6.60 | Nitro receiver-pack voltage represented as 0%. Valid minimum is at least 4.0 V. |
 | **Rx Pack Maximum** | 8.40 | Nitro receiver-pack voltage represented as 100%. Valid maximum is no more than 9.0 V and must be at least 0.1 V above the minimum. |
-| **Motor Switch** | Unset | Select the whole physical motor switch, such as `SG`, not an individual position condition or output channel. The widget detects switch movement and validates stopped/running state with current aircraft telemetry. |
-| **Flight Counter** | KSE Counter | `KSE Counter` uses Timer 1 and `/flights-count.csv`; `RotorFlight` reads the FC's persistent qualified-flight total through RF Tool; `Sim Preview` displays synthetic values for layout review and does not use live RF Tool or telemetry. |
+| **Motor Switch** | SG | Select the whole physical motor switch, such as `SG`, not an individual position condition or output channel. The widget detects switch movement and validates stopped/running state with current aircraft telemetry. |
+| **Flight Counter** | RotorFlight | `KSE Counter` uses Timer 1 and `/flights-count.csv`; `RotorFlight` reads the FC's persistent qualified-flight total through RF Tool; `Sim Preview` displays synthetic values for layout review and does not use live RF Tool or telemetry. |
 
 ## Flight-counter setup
 
@@ -177,7 +181,7 @@ KSE5 provides the same functional settings with a different Theme list:
 The KSE Counter is stored per model in `/flights-count.csv` at the root of the SD card. It uses EdgeTX Timer 1:
 
 1. Configure Timer 1 to run from the appropriate motor-active condition.
-2. Set **Min. Flight Time (sec)** to the desired qualification time.
+2. Set **KSE Counter Min (sec)** to the desired qualification time.
 3. After Timer 1 has reached that duration, resetting Timer 1 counts one KSE flight.
 
 The widget does not configure, start, stop, or reset Timer 1 for you.
@@ -220,8 +224,9 @@ Sensor names are case-sensitive. Discover telemetry while the receiver and FC ar
 | `Bat%` | Rotorflight battery percentage, including Smart Fuel when configured on the FC. |
 | `Tesc` | ESC temperature and temperature warning. |
 | `Gov` | Rotorflight governor state. |
-| `BAT#` | Active battery-profile number used by the top-bar `Batt` indicator and Electric profile display. |
-| `PID#` | Active PID/profile bank used by the top-bar `Bank` indicator. |
+| `BAT#` | Active battery-profile number shown in KSE5's battery ring and above KSE4's battery bar. |
+| `PID#` | Active PID profile used by the top-bar `Profile` indicator. |
+| `RTE#` | Active rate profile used by the top-bar `Rate` indicator. |
 | `Vbat` | Electric pack voltage and connected-pack evidence. |
 
 ### OMPHOBBY
@@ -273,7 +278,7 @@ The filename must be exactly `default.png`; leaving the alternate image named `d
 | Battery profiles do not open | Profiles are Electric-only. Confirm RF Tool connection, valid Rotorflight battery capacities, disarmed state, stopped governor, and zero headspeed. |
 | Rotorflight FC count is unavailable | Confirm RF Tool 2.3, the `ARM` sensor, enabled Rotorflight model statistics, a disarmed model, and the complete `/SCRIPTS/RF2/` directory. |
 | Nitro battery is missing | Nitro uses `Vbec`; it does not load a battery profile. |
-| Top-bar `Batt / Bank` indicator is missing | Confirm a live telemetry link and discover both `BAT#` and `PID#`. The indicator remains hidden unless both values are valid. |
+| Top-bar `Profile / Rate` indicator is missing | Confirm a live telemetry link and discover both `PID#` and `RTE#`. The indicator remains hidden unless both values are valid. |
 | Model image is missing | Match the EdgeTX model name and `/IMAGES/` filename, including capitalization. |
 | Telemetry fields show `--` or `NO DATA` | Re-discover sensors and confirm the exact case-sensitive names above. If needed, try pasting the CLI command above for telemetry sensors. |
 

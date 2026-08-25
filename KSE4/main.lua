@@ -248,7 +248,7 @@ end
 -- lets other dashboards use the same per-model counters without migration or
 -- competing widget-local copies.
 local FLIGHTS_PATH              = "/flights-count.csv"
-local TOPBAR_MIN_DUR_DEFAULT    = 60
+local TOPBAR_MIN_DUR_DEFAULT    = 20
 local FLIGHT_CACHE_MAX_ENTRIES  = 200
 local flightCache       = nil
 local modelFlights      = 0
@@ -357,7 +357,7 @@ local OPT = {
   reservePct    = 0,
   battVoice     = false,
   simTelemetry  = false,
-  flightCounter = 1,
+  flightCounter = 2, -- FC.ROTORFLIGHT; FC is declared immediately below.
   rxPackMin     = 6.6,
   rxPackMax     = 8.4,
   rxPackValid   = true,
@@ -521,18 +521,23 @@ local function applyOptions(opts)
   local rawBatt = tonumber(opts and opts.TxBatt) or 0
   txIsLiIon = (rawBatt == 2)
   local rawDur = tonumber(opts and (opts.MinFlight
+                                    or opts["KSE Counter Min (sec)"]
                                     or opts["Min. Flight Time (sec)"]
                                     or opts.TopMinDur))
                  or TOPBAR_MIN_DUR_DEFAULT
   if rawDur < 0 then rawDur = math.abs(rawDur) end
   if rawDur < 1 then rawDur = 1 end
   minFlightDur = rawDur
-  OPT.flightCounter = FC.RADIO
+  OPT.flightCounter = FC.ROTORFLIGHT
   OPT.simTelemetry = false
+  local sgInfo = type(getFieldInfo) == "function" and getFieldInfo("SG") or nil
+  local defaultMotorSwitch = type(sgInfo) == "table" and sgInfo.id or 0
+  SRC.motorSwitch = defaultMotorSwitch
   if opts then
     -- The Motor Switch is the only mapped source. Rotorflight Gov/Hspd or OMP
     -- NR telemetry validates what a movement means; other sensors auto-detect.
-    SRC.motorSwitch = opts.MotorSw or opts["Motor Switch"] or 0
+    SRC.motorSwitch = opts.MotorSw or opts["Motor Switch"]
+                      or defaultMotorSwitch
     -- Heli Type CHOICE (1-based): Electric=1, Nitro=2, OMPHOBBY=3.
     -- OMPHOBBY shares the percentage bar but has its own telemetry contract.
     local bb = tonumber(opts.HeliType or opts["Heli Type"]) or 1
@@ -553,8 +558,10 @@ local function applyOptions(opts)
             or opts["Simulate Telemetry"] == true) then
       countMode = FC.SIM_PREVIEW
     end
-    if countMode ~= FC.ROTORFLIGHT and countMode ~= FC.SIM_PREVIEW then
-      countMode = FC.RADIO
+    if countMode ~= FC.RADIO
+       and countMode ~= FC.ROTORFLIGHT
+       and countMode ~= FC.SIM_PREVIEW then
+      countMode = FC.ROTORFLIGHT
     end
     OPT.flightCounter = countMode
     OPT.simTelemetry = countMode == FC.SIM_PREVIEW
@@ -743,6 +750,7 @@ local ROTORFLIGHT_SENSOR = {
   governorMode     = "Gov",
   batteryProfile   = "BAT#",
   pidProfile       = "PID#",
+  rateProfile      = "RTE#",
   -- Pack voltage remains a separate input used to validate electric packs.
   packVoltage      = "Vbat",
 }
@@ -2881,9 +2889,13 @@ local function buildTopBar()
   local battY = centerY - totalBattH / 2 + terminalH + oneY
   local sigX = battX - G.x(14) - G.x(36)
   local profileSignalGap = math.max(8, G.x(10))
-  local profileX = timerX + G.x(150)
+  local profileMinW = #"Profile 6 / Rate 6" * 9
+  local profileX = math.min(timerX + G.x(150),
+                            sigX - profileSignalGap - profileMinW)
+  local profileY = math.floor(centerY - 11)
+  if G.screen480x320 then profileY = profileY + 2 end
   V.profileStatus = newLabel(
-    profileX, math.floor(centerY - 11),
+    profileX, profileY,
     math.max(1, sigX - profileSignalGap - profileX), "",
     SMLSIZE, C_TEXT, RIGHT)
   V.signal = {}
@@ -3164,6 +3176,7 @@ local function updateBottom()
                    and (G.compact and string.format(" · %dmAh", capa)
                                   or string.format(" · %d mAh used", capa))
                    or ""
+  local prof = getBattProfile()
   local batteryTitle = G.compact and "BATT" or "BATTERY"
   local header
   if not D.hasBattData and OPT.heliType == HELI_OMPHOBBY
@@ -3171,6 +3184,9 @@ local function updateBottom()
     header = batteryTitle .. " · ADD M1 OR M2 TO MODEL NAME"
   elseif not D.hasBattData then
     header = batteryTitle .. " · no data"
+  elseif cells > 0 and volt > 0 and prof and prof > 0 then
+    header = string.format("%s · P%d · %dS · %.1fV",
+                           batteryTitle, math.floor(prof), cells, volt) .. usedText
   elseif cells > 0 and volt > 0 then
     header = string.format("%s · %dS · %.1fV",
                            batteryTitle, cells, volt) .. usedText
@@ -3244,27 +3260,27 @@ local function updateUiState()
     setObject(bar, { color=(i <= bars) and sigColor or C_LINE })
   end
 
-  local batteryProfile = getSensorNumber("batteryProfile")
-  local profileBank = getSensorNumber("pidProfile")
-  batteryProfile = tonumber(batteryProfile)
-  profileBank = tonumber(profileBank)
-  if not batteryProfile or batteryProfile ~= math.floor(batteryProfile)
-     or batteryProfile < 1 or batteryProfile > BATTERY_PROFILE_COUNT then
-    batteryProfile = nil
+  local pidProfile = getSensorNumber("pidProfile")
+  local rateProfile = getSensorNumber("rateProfile")
+  pidProfile = tonumber(pidProfile)
+  rateProfile = tonumber(rateProfile)
+  if not pidProfile or pidProfile ~= math.floor(pidProfile)
+     or pidProfile < 1 or pidProfile > 6 then
+    pidProfile = nil
   end
-  if not profileBank or profileBank ~= math.floor(profileBank)
-     or profileBank < 1 or profileBank > 6 then
-    profileBank = nil
+  if not rateProfile or rateProfile ~= math.floor(rateProfile)
+     or rateProfile < 1 or rateProfile > 6 then
+    rateProfile = nil
   end
   if OPT.simTelemetry then
-    batteryProfile, profileBank = 1, 1
+    pidProfile, rateProfile = 1, 1
   end
   local profilesReady = OPT.simTelemetry
                         or (A.linkAvailable
-                            and batteryProfile and profileBank)
+                            and pidProfile and rateProfile)
   setLabel(V.profileStatus,
-    profilesReady and string.format("Batt %d / Bank %d",
-      batteryProfile, profileBank) or "", C_TEXT)
+    profilesReady and string.format("Profile %d / Rate %d",
+      pidProfile, rateProfile) or "", C_TEXT)
 
   local txPct = txPctFromVolts(getTxVolt(), txIsLiIon)
   if txPct then
@@ -4611,9 +4627,18 @@ local function showNativeBatteryProfileMenu(wgt)
     title = title .. " - P" .. tostring(wgt.profileActive) .. " ACTIVE"
   end
   local unsafe, unsafeMessage = profileSwitchUnsafe(wgt)
+  local profileIndexes = {}
   local values = {}
   for i = 1, BATTERY_PROFILE_COUNT do
-    values[i] = profileButtonText(wgt, i, false)
+    local capacity = wgt.profileCapacities
+                     and tonumber(wgt.profileCapacities[i]) or nil
+    if capacity and capacity > 0 then
+      profileIndexes[#profileIndexes + 1] = i
+      values[#values + 1] = profileButtonText(wgt, i, false)
+    end
+  end
+  if #profileIndexes == 0 then
+    values[#values + 1] = "NO CONFIGURED PROFILES"
   end
   local safetyIndex
   if unsafe then
@@ -4624,17 +4649,22 @@ local function showNativeBatteryProfileMenu(wgt)
   local ok = pcall(lvgl.menu, {
     title=title,
     values=values,
-    get=function() return wgt.profileActive or 0 end,
+    get=function()
+      for valueIndex, profileIndex in ipairs(profileIndexes) do
+        if wgt.profileActive == profileIndex then return valueIndex end
+      end
+      return 0
+    end,
     set=function(selected)
-      local profileIndex = tonumber(selected)
+      local valueIndex = tonumber(selected)
       wgt.profileAutoShown = true
-      if safetyIndex and profileIndex == safetyIndex then
+      if safetyIndex and valueIndex == safetyIndex then
         profileSetNotice(wgt, "PROFILE CHANGE LOCKED",
                          unsafeMessage, C_RED, 500)
         return
       end
-      if not profileIndex or profileIndex < 1
-         or profileIndex > BATTERY_PROFILE_COUNT then return end
+      local profileIndex = valueIndex and profileIndexes[valueIndex] or nil
+      if not profileIndex then return end
       local ready = profileTransport() ~= nil
                     and (wgt.profileRfState == "connected"
                          or wgt.profileRfState == "armed"
@@ -4699,11 +4729,18 @@ showBatteryProfileMenu = function(wgt)
     return showNativeBatteryProfileMenu(wgt)
   end
   wgt.profileDialog = dialog
-  local children = {}
+  local profileIndexes = {}
   for i = 1, BATTERY_PROFILE_COUNT do
-    local profileIndex = i
-    local col = (i - 1) % 2
-    local row = math.floor((i - 1) / 2)
+    local capacity = wgt.profileCapacities
+                     and tonumber(wgt.profileCapacities[i]) or nil
+    if capacity and capacity > 0 then
+      profileIndexes[#profileIndexes + 1] = i
+    end
+  end
+  local children = {}
+  for buttonIndex, profileIndex in ipairs(profileIndexes) do
+    local col = (buttonIndex - 1) % 2
+    local row = math.floor((buttonIndex - 1) / 2)
     children[#children + 1] = {
       type="button", x=18 + col * 190, y=22 + row * 52,
       w=174, h=46, font=SMLSIZE, cornerRadius=6,
@@ -4748,6 +4785,7 @@ showBatteryProfileMenu = function(wgt)
     text=(function()
       local unsafe, unsafeMessage = profileSwitchUnsafe(wgt)
       if unsafe then return unsafeMessage end
+      if #profileIndexes == 0 then return "NO CONFIGURED PROFILES" end
       return wgt.profileMessage or "SELECT A PROFILE"
     end)(),
   }
@@ -5382,7 +5420,7 @@ end
 -- OMPHOBBY uses NR, RxBt, Curr, Capa, Bat%, and Tmp; its cell count comes
 -- from M1/M2 in the model name, and it has no tail-RPM telemetry source.
 -- CountSrc occupies slot 10 so the original nine saved option indices remain
--- unchanged. KSE Counter remains the default, Rotorflight FC reads command 14 through
+-- unchanged. Rotorflight FC is the default and reads command 14 through
 -- RF Tool, and Sim Preview retains the isolated Companion display path.
 -- "Motor Switch" is a raw SOURCE so settings select the physical control (SG),
 -- not one of its individual position conditions (SG up/middle/down). A movement
@@ -5403,12 +5441,15 @@ local options = {
   { "BattVoice", BOOL, 0 },
   { "RxPackMin", STRING, "6.60" },
   { "RxPackMax", STRING, "8.40" },
-  { "MotorSw", SOURCE, 0 },
-  { "CountSrc", CHOICE, 1, { "KSE Counter", "Rotorflight FC", "Sim Preview" } },
+  { "MotorSw", SOURCE, (function()
+      local info = type(getFieldInfo) == "function" and getFieldInfo("SG") or nil
+      return type(info) == "table" and info.id or 0
+    end)() },
+  { "CountSrc", CHOICE, 2, { "KSE Counter", "Rotorflight FC", "Sim Preview" } },
 }
 local OPTION_LABELS = {
   TxBatt   = "TX Battery",
-  MinFlight= "Min. Flight Time (sec)",
+  MinFlight= "KSE Counter Min (sec)",
   HeliType = "Heli Type",
   BattRsv  = "Batt Reserve %",
   BattVoice= "Battery Voice",
