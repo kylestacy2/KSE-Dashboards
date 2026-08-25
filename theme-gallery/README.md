@@ -2,6 +2,8 @@
 
 These preview sheets show every theme included with both dashboards. The telemetry values are illustrative; the colors are matched to the current widget source.
 
+> **Rendering note:** These images are reference renderings, not screenshots of the widgets running on a transmitter. The actual KSE4 and KSE5 widgets are laid out slightly differently. This gallery is intended to give users a clear reference for what each theme's colors look like.
+
 ## KSE4 themes
 
 [![KSE4 theme preview sheet](assets/kse4-theme-sheet.png)](assets/kse4-theme-sheet.png)
