@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Visual theme samples for the KSE4 and KSE5 EdgeTX telemetry dashboards.">
+  <meta name="theme-color" content="#090b10">
+  <title>KSE Dashboard Theme Gallery</title>
+  <link rel="stylesheet" href="styles.css?v=20260825">
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__inner">
+      <a class="eyebrow" href="../README.md">KSE Dashboards</a>
+      <h1>Theme gallery</h1>
+      <p class="lede">Source-matched color previews for every KSE4 and KSE5 theme, shown with representative flight telemetry.</p>
+      <div class="totals" aria-label="Gallery totals">
+        <span><strong id="total-samples">44</strong> samples</span>
+        <span><strong id="kse4-total">22</strong> KSE4</span>
+        <span><strong id="kse5-total">22</strong> KSE5</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="controls" aria-label="Gallery controls">
+      <div class="filter-group" role="group" aria-label="Filter by widget">
+        <button class="filter is-active" type="button" data-filter="all" aria-pressed="true">Both</button>
+        <button class="filter" type="button" data-filter="kse4" aria-pressed="false">KSE4</button>
+        <button class="filter" type="button" data-filter="kse5" aria-pressed="false">KSE5</button>
+      </div>
+      <label class="search">
+        <span class="sr-only">Search themes</span>
+        <input id="theme-search" type="search" placeholder="Search themes" autocomplete="off">
+      </label>
+    </div>
+
+    <div id="gallery" class="gallery" aria-live="polite"></div>
+    <p id="empty-state" class="empty-state" hidden>No themes match that search.</p>
+
+    <aside class="gallery-note">
+      <strong>About these samples</strong>
+      <p>The colors match the widget source. Telemetry values are illustrative, and the previews use the 480×272 radio aspect ratio. Actual text spacing can vary slightly by radio and EdgeTX font rendering.</p>
+    </aside>
+  </main>
+
+  <footer>
+    <p>KSE4 and KSE5 telemetry dashboards for EdgeTX.</p>
+  </footer>
+
+  <noscript>This gallery needs JavaScript for filtering. The complete preview sheets are available in <a href="README.md">the gallery README</a>.</noscript>
+  <script src="themes.js?v=20260825"></script>
+  <script src="gallery.js?v=20260825"></script>
+</body>
+</html>

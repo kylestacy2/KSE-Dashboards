@@ -104,7 +104,64 @@ local function applyTheme(name)
   C_RED    = rgb(255, 64, 80)
   C_BLUE   = rgb(55, 136, 255)
   C_CYAN   = rgb(30, 220, 240)
-  if name == "light" then
+  -- KSE4-inspired opaque palettes. Each entry retains KSE4's background,
+  -- tile, border, muted-text, and accent colors; KSE5 derives its additional
+  -- top-bar, alternate-panel, and ring-track layers from those five anchors.
+  -- Only the selected palette is allocated, which keeps radio memory bounded.
+  local p
+  if name == "red" then
+    p = {100,18,18, 130,28,28, 180,50,50, 240,165,165, 255,95,95}
+  elseif name == "blue" then
+    p = {4,20,54, 10,32,74, 28,72,124, 150,180,220, 80,165,255}
+  elseif name == "pink" then
+    p = {145,0,83, 184,0,105, 255,20,147, 255,196,225, 255,222,239}
+  elseif name == "green" then
+    p = {6,54,22, 12,74,34, 24,120,58, 150,215,175, 60,220,120}
+  elseif name == "purple" then
+    p = {34,12,60, 50,22,82, 92,46,140, 190,165,225, 175,110,245}
+  elseif name == "reef" then
+    p = {8,22,58, 8,46,50, 24,96,104, 150,190,218, 70,200,230}
+  elseif name == "royal" then
+    p = {40,16,66, 52,40,12, 112,88,28, 202,172,228, 180,120,248}
+  elseif name == "ember" then
+    p = {70,18,10, 92,52,8, 150,88,26, 235,175,150, 255,150,50}
+  elseif name == "graphite" then
+    p = {18,21,25, 34,39,46, 75,85,98, 165,175,188, 215,225,235}
+  elseif name == "glacier" then
+    p = {8,28,42, 18,52,68, 46,105,126, 155,203,218, 117,225,250}
+  elseif name == "sunset" then
+    p = {96,12,10, 160,48,8, 230,105,20, 255,191,145, 255,190,48}
+  elseif name == "synthwave" then
+    p = {22,10,55, 59,13,70, 147,35,126, 205,154,226, 71,229,255}
+  elseif name == "gulf" then
+    p = {10,48,65, 16,72,88, 204,102,36, 162,205,216, 255,139,59}
+  elseif name == "voltage" then
+    p = {9,19,10, 26,37,17, 83,117,31, 183,204,145, 185,255,50}
+  elseif name == "titanium_ember" then
+    p = {11,14,18, 41,49,58, 100,113,125, 174,184,193, 255,138,61}
+  elseif name == "aurora" then
+    p = {6,27,24, 23,27,59, 52,84,122, 159,185,200, 116,242,206}
+  elseif name == "desert_night" then
+    p = {26,21,12, 52,51,27, 118,101,59, 201,187,139, 245,196,81}
+  end
+  if p then
+    C_BG        = rgb(p[1], p[2], p[3])
+    C_TOP       = rgb(math.floor((p[1] * 2 + p[4]) / 3 + 0.5),
+                      math.floor((p[2] * 2 + p[5]) / 3 + 0.5),
+                      math.floor((p[3] * 2 + p[6]) / 3 + 0.5))
+    C_PANEL     = rgb(p[4], p[5], p[6])
+    C_PANEL_ALT = rgb(math.floor((p[4] * 2 + p[7]) / 3 + 0.5),
+                      math.floor((p[5] * 2 + p[8]) / 3 + 0.5),
+                      math.floor((p[6] * 2 + p[9]) / 3 + 0.5))
+    C_BORDER    = rgb(p[7], p[8], p[9])
+    C_TRACK     = rgb(math.floor((p[4] + p[7]) / 2 + 0.5),
+                      math.floor((p[5] + p[8]) / 2 + 0.5),
+                      math.floor((p[6] + p[9]) / 2 + 0.5))
+    C_TEXT      = rgb(245, 245, 245)
+    C_DIM       = rgb(p[10], p[11], p[12])
+    C_ACCENT    = rgb(p[13], p[14], p[15])
+    C_IMAGE_BG  = C_PANEL_ALT
+  elseif name == "light" then
     C_BG        = rgb(223, 236, 247)
     C_TOP       = rgb(250, 253, 255)
     C_PANEL     = rgb(244, 250, 255)
@@ -440,7 +497,11 @@ local function applyOptions(opts)
   local rawTheme = tonumber(opts and opts.Theme) or 0
   local themeNames = {
     [1]="dark", [2]="light", [3]="arctic", [4]="violet",
-    [5]="orange",
+    [5]="orange", [6]="red", [7]="blue", [8]="pink",
+    [9]="green", [10]="purple", [11]="reef", [12]="royal",
+    [13]="ember", [14]="graphite", [15]="glacier", [16]="sunset",
+    [17]="synthwave", [18]="gulf", [19]="voltage",
+    [20]="titanium_ember", [21]="aurora", [22]="desert_night",
   }
   OPT.bgTransparent = false
   OPT.themeName = themeNames[rawTheme] or "dark"
@@ -5248,6 +5309,9 @@ end
 local options = {
   { "Theme",     CHOICE, 1, {
       "Dark", "Light", "Arctic Blue", "Midnight Violet", "Orange",
+      "Red", "Blue", "Pink", "Green", "Purple", "Reef", "Royal",
+      "Ember", "Graphite", "Glacier", "Sunset", "Synthwave", "Gulf",
+      "Voltage", "Titanium Ember", "Aurora", "Desert Night",
     } },
   { "TxBatt",    CHOICE, 1, { "LiPo", "Li-Ion" } },
   { "MinFlight", VALUE, TOPBAR_MIN_DUR_DEFAULT, -30, 120 },

@@ -3,11 +3,15 @@
 KSE4 and KSE5 are full-screen EdgeTX telemetry dashboards for RC helicopters. They provide the same core flight information, alerts, top-bar PID/rate-profile indication, battery-profile support, Rotorflight diagnostics, and flight-counter choices. The main difference is the dashboard layout and visual style:
 
 - **KSE4** uses the original information-dense dashboard with a large theme selection.
-- **KSE5** uses the newer ring-style dashboard with a smaller, curated theme selection.
+- **KSE5** uses the newer ring-style dashboard with its own 22-theme palette collection.
 
 Choose the version whose layout you prefer. Both versions can be installed on the same radio, but only one needs to be added to a telemetry screen. Do not have multiple screens setup at one time, please choose one or the other when setting up your screen. Using them at the same time on separate can create issues and cause your radio to go into Emergency Mode.
 
 > **Safety:** These widgets are informational aids. They do not replace correctly configured radio alarms, motor safety, telemetry-loss warnings, or failsafe settings. Bench-test a new installation with the motor physically unable to start before flying.
+
+## Theme gallery
+
+See the [KSE4 and KSE5 theme gallery](theme-gallery/README.md) for GitHub-native preview sheets of every theme. The same folder also contains a searchable interactive gallery that can be opened locally or published with GitHub Pages.
 
 ## What is included
 
@@ -162,7 +166,7 @@ KSE5 provides the same functional settings with a different Theme list:
 
 | Setting | Default | Explanation |
 | --- | --- | --- |
-| **Theme** | Dark | Selects Dark, Light, Arctic Blue, Midnight Violet, or Orange. This changes presentation only. |
+| **Theme** | Dark | Selects from 22 palettes: Dark, Light, Arctic Blue, Midnight Violet, Orange, Red, Blue, Pink, Green, Purple, Reef, Royal, Ember, Graphite, Glacier, Sunset, Synthwave, Gulf, Voltage, Titanium Ember, Aurora, or Desert Night. This changes presentation only. |
 | **TX Battery** | LiPo | Selects the voltage mapping for the transmitter battery gauge: 2S LiPo or 2S Li-Ion. It does not affect the helicopter battery calculation. |
 | **KSE Counter Min (sec)** | 20 | Minimum Timer 1 elapsed time required by the KSE Counter. It does not change Rotorflight FC's own minimum armed-time setting. |
 | **Heli Type** | Electric | Selects Electric, Nitro, or OMPHOBBY telemetry and battery behavior. Electric supports Rotorflight battery profiles; Nitro uses receiver-pack voltage and has no battery profiles; OMPHOBBY uses its own telemetry names. |

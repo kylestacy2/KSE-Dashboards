@@ -5,6 +5,7 @@
 !/flights-count.csv
 !/KSE4/
 !/KSE5/
+!/theme-gallery/
 
 # Local future-widget design/reference document; do not publish.
 /KSE_FUTURE_WIDGET_IMPLEMENTATION_BLUEPRINT.md
@@ -26,3 +27,16 @@
 !/KSE5/BatterySounds/
 /KSE5/BatterySounds/*
 !/KSE5/BatterySounds/*.wav
+
+# GitHub theme gallery and committed preview assets
+/theme-gallery/*
+!/theme-gallery/README.md
+!/theme-gallery/index.html
+!/theme-gallery/styles.css
+!/theme-gallery/themes.js
+!/theme-gallery/gallery.js
+!/theme-gallery/generate_previews.py
+!/theme-gallery/validate_gallery.py
+!/theme-gallery/assets/
+/theme-gallery/assets/*
+!/theme-gallery/assets/*.png
