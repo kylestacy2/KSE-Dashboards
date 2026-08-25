@@ -1,6 +1,6 @@
 # KSE Dashboards for EdgeTX
 
-KSE4 and KSE5 are full-screen EdgeTX telemetry dashboards for RC helicopters. They provide the same core flight information, alerts, battery-profile support, Rotorflight diagnostics, and flight-counter choices. The main difference is the dashboard layout and visual style:
+KSE4 and KSE5 are full-screen EdgeTX telemetry dashboards for RC helicopters. They provide the same core flight information, alerts, top-bar battery/profile indication, battery-profile support, Rotorflight diagnostics, and flight-counter choices. The main difference is the dashboard layout and visual style:
 
 - **KSE4** uses the original information-dense dashboard with a large theme selection.
 - **KSE5** uses the newer ring-style dashboard with a smaller, curated theme selection.
@@ -92,6 +92,7 @@ With the motor disconnected or otherwise physically unable to start, verify:
 - Live telemetry appears and disappears correctly with the FC connection.
 - The selected Motor Switch is the actual physical switch.
 - Battery warnings and haptics behave as expected.
+- The top bar shows the active battery and PID/profile banks while connected and clears them after disconnect.
 - Electric battery-profile changes are blocked while armed, while the governor is running, or while headspeed is present.
 - The selected flight counter updates according to its documented behavior.
 
@@ -108,6 +109,22 @@ With the motor disconnected or otherwise physically unable to start, verify:
 | Sim Preview | No | No | No | Simulated only |
 
 Normal dashboard telemetry comes directly from EdgeTX telemetry sensors. RF Tool is used for the additional FC-side operations shown above.
+
+### Top-bar battery/profile indicator
+
+KSE4 and KSE5 show the active battery profile and PID/profile bank together in the top bar:
+
+```text
+Batt 3 / Bank 5
+```
+
+- `Batt` is the active battery profile reported by the `BAT#` telemetry sensor.
+- `Bank` is the active PID/profile bank reported by the `PID#` telemetry sensor.
+- The indicator appears only while the telemetry link is live and both values are valid whole numbers from 1 through 6.
+- It clears when the link disconnects or either sensor is missing or invalid.
+- Sim Preview displays `Batt 1 / Bank 1` using simulated values.
+
+This indicator is display-only. It reads normal EdgeTX telemetry and does not add MSP traffic, change a profile, or bypass the existing battery-profile safety checks. The battery-profile number was removed from the battery footer so it is shown in one consistent location.
 
 ### Electric battery profiles
 
@@ -203,7 +220,8 @@ Sensor names are case-sensitive. Discover telemetry while the receiver and FC ar
 | `Bat%` | Rotorflight battery percentage, including Smart Fuel when configured on the FC. |
 | `Tesc` | ESC temperature and temperature warning. |
 | `Gov` | Rotorflight governor state. |
-| `BAT#` | Active Electric battery-profile telemetry. |
+| `BAT#` | Active battery-profile number used by the top-bar `Batt` indicator and Electric profile display. |
+| `PID#` | Active PID/profile bank used by the top-bar `Bank` indicator. |
 | `Vbat` | Electric pack voltage and connected-pack evidence. |
 
 ### OMPHOBBY
@@ -255,6 +273,7 @@ The filename must be exactly `default.png`; leaving the alternate image named `d
 | Battery profiles do not open | Profiles are Electric-only. Confirm RF Tool connection, valid Rotorflight battery capacities, disarmed state, stopped governor, and zero headspeed. |
 | Rotorflight FC count is unavailable | Confirm RF Tool 2.3, the `ARM` sensor, enabled Rotorflight model statistics, a disarmed model, and the complete `/SCRIPTS/RF2/` directory. |
 | Nitro battery is missing | Nitro uses `Vbec`; it does not load a battery profile. |
+| Top-bar `Batt / Bank` indicator is missing | Confirm a live telemetry link and discover both `BAT#` and `PID#`. The indicator remains hidden unless both values are valid. |
 | Model image is missing | Match the EdgeTX model name and `/IMAGES/` filename, including capitalization. |
 | Telemetry fields show `--` or `NO DATA` | Re-discover sensors and confirm the exact case-sensitive names above. If needed, try pasting the CLI command above for telemetry sensors. |
 

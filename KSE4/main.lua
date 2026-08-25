@@ -742,6 +742,7 @@ local ROTORFLIGHT_SENSOR = {
   escTemperature   = "Tesc",
   governorMode     = "Gov",
   batteryProfile   = "BAT#",
+  pidProfile       = "PID#",
   -- Pack voltage remains a separate input used to validate electric packs.
   packVoltage      = "Vbat",
 }
@@ -2879,6 +2880,12 @@ local function buildTopBar()
   local battX = G.originX + G.w - G.x(10) - battW
   local battY = centerY - totalBattH / 2 + terminalH + oneY
   local sigX = battX - G.x(14) - G.x(36)
+  local profileSignalGap = math.max(8, G.x(10))
+  local profileX = timerX + G.x(150)
+  V.profileStatus = newLabel(
+    profileX, math.floor(centerY - 11),
+    math.max(1, sigX - profileSignalGap - profileX), "",
+    SMLSIZE, C_TEXT, RIGHT)
   V.signal = {}
   for i, referenceH in ipairs(SIG_HEIGHTS) do
     local bh = math.max(1, G.y(referenceH))
@@ -3157,7 +3164,6 @@ local function updateBottom()
                    and (G.compact and string.format(" · %dmAh", capa)
                                   or string.format(" · %d mAh used", capa))
                    or ""
-  local prof = getBattProfile()
   local batteryTitle = G.compact and "BATT" or "BATTERY"
   local header
   if not D.hasBattData and OPT.heliType == HELI_OMPHOBBY
@@ -3165,9 +3171,6 @@ local function updateBottom()
     header = batteryTitle .. " · ADD M1 OR M2 TO MODEL NAME"
   elseif not D.hasBattData then
     header = batteryTitle .. " · no data"
-  elseif cells > 0 and volt > 0 and prof and prof > 0 then
-    header = string.format("%s · P%d · %dS · %.1fV",
-                           batteryTitle, math.floor(prof), cells, volt) .. usedText
   elseif cells > 0 and volt > 0 then
     header = string.format("%s · %dS · %.1fV",
                            batteryTitle, cells, volt) .. usedText
@@ -3240,6 +3243,28 @@ local function updateUiState()
   for i, bar in ipairs(V.signal) do
     setObject(bar, { color=(i <= bars) and sigColor or C_LINE })
   end
+
+  local batteryProfile = getSensorNumber("batteryProfile")
+  local profileBank = getSensorNumber("pidProfile")
+  batteryProfile = tonumber(batteryProfile)
+  profileBank = tonumber(profileBank)
+  if not batteryProfile or batteryProfile ~= math.floor(batteryProfile)
+     or batteryProfile < 1 or batteryProfile > BATTERY_PROFILE_COUNT then
+    batteryProfile = nil
+  end
+  if not profileBank or profileBank ~= math.floor(profileBank)
+     or profileBank < 1 or profileBank > 6 then
+    profileBank = nil
+  end
+  if OPT.simTelemetry then
+    batteryProfile, profileBank = 1, 1
+  end
+  local profilesReady = OPT.simTelemetry
+                        or (A.linkAvailable
+                            and batteryProfile and profileBank)
+  setLabel(V.profileStatus,
+    profilesReady and string.format("Batt %d / Bank %d",
+      batteryProfile, profileBank) or "", C_TEXT)
 
   local txPct = txPctFromVolts(getTxVolt(), txIsLiIon)
   if txPct then

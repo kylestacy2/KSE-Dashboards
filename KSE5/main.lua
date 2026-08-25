@@ -674,6 +674,7 @@ local ROTORFLIGHT_SENSOR = {
   escTemperature   = "Tesc",
   governorMode     = "Gov",
   batteryProfile   = "BAT#",
+  pidProfile       = "PID#",
   -- Pack voltage remains a separate input used to validate electric packs.
   packVoltage      = "Vbat",
 }
@@ -2383,7 +2384,10 @@ local function buildTopBar(wgt)
   local txBodyX = t.x + t.w - l.pad - txBodyW
   local txBodyY = t.y + math.max(7, G.y(9))
   local centerY = G.rounded(t.y + t.h / 2)
-  local sigX = txBodyX - math.max(8, G.x(14)) - math.max(28, G.x(36))
+  -- KSE4's signal geometry is based on an 800x480 reference. Convert those
+  -- exact proportions into KSE5's 480x320 reference so both glyphs render at
+  -- the same physical size and battery-relative position on every target.
+  local sigX = txBodyX - G.x(8.4) - G.x(21.6)
   local timerW = math.max(90, G.x(100))
   local timerX = t.x + math.floor((t.w - timerW) / 2)
   local modelNameX = t.x + math.max(5, G.x(6))
@@ -2397,15 +2401,22 @@ local function buildTopBar(wgt)
   ui.timer = newLabel(wgt, timerX, t.y + math.max(1, G.y(2)),
                       timerW, "", G.fontTimer, C_TEXT, CENTERED)
 
+  local profileSignalGap = math.max(8, G.x(10))
+  local profileX = timerX + timerW - math.max(20, G.x(28))
+  ui.profileStatus = newLabel(
+    wgt, profileX, math.floor(centerY - 11),
+    math.max(1, sigX - profileSignalGap - profileX), "",
+    SMLSIZE, C_TEXT, RIGHT)
+
   -- Match KSE4's ascending four-bar link-quality glyph immediately to the
   -- left of the vertical transmitter-battery indicator.
   ui.signal = {}
   for i, referenceH in ipairs(G.signalHeights) do
-    local barH = math.max(1, G.y(referenceH))
+    local barH = math.max(1, G.y(referenceH * 2 / 3))
     ui.signal[i] = newRect(wgt,
-      sigX + (i - 1) * math.max(6, G.x(10)),
-      centerY + math.max(7, G.y(10)) - barH,
-      math.max(4, G.x(6)), barH, C_BORDER, true, 0, 0)
+      sigX + (i - 1) * G.x(6),
+      centerY + G.y(20 / 3) - barH,
+      math.max(1, G.x(3.6)), barH, C_BORDER, true, 0, 0)
   end
 
   ui.txBody = newPanel(wgt, txBodyX, txBodyY, txBodyW, txBodyH,
@@ -2652,6 +2663,28 @@ local function updateTopBar(wgt)
     setObject(wgt, bar, { color=i <= bars and signalColor or C_BORDER })
   end
 
+  local batteryProfile = getSensorNumber("batteryProfile")
+  local profileBank = getSensorNumber("pidProfile")
+  batteryProfile = tonumber(batteryProfile)
+  profileBank = tonumber(profileBank)
+  if not batteryProfile or batteryProfile ~= math.floor(batteryProfile)
+     or batteryProfile < 1 or batteryProfile > BATTERY_PROFILE_COUNT then
+    batteryProfile = nil
+  end
+  if not profileBank or profileBank ~= math.floor(profileBank)
+     or profileBank < 1 or profileBank > 6 then
+    profileBank = nil
+  end
+  if OPT.simTelemetry then
+    batteryProfile, profileBank = 1, 1
+  end
+  local profilesReady = OPT.simTelemetry
+                        or (A.linkAvailable
+                            and batteryProfile and profileBank)
+  setLabel(wgt, ui.profileStatus,
+    profilesReady and string.format("Batt %d / Bank %d",
+      batteryProfile, profileBank) or "", C_TEXT)
+
   local txPct = txPctFromVolts(getTxVolt(), txIsLiIon)
   if txPct then
     local innerH = ui.txBodyH - ui.txInset * 2
@@ -2699,10 +2732,6 @@ local function batteryFooter()
     return "ADD M1/M2 NAME"
   end
   local parts = {}
-  local profile = getBattProfile()
-  if OPT.heliType == HELI_ELECTRIC and profile and profile > 0 then
-    parts[#parts+1] = "P" .. tostring(math.floor(profile))
-  end
   if D.cellCountValid then parts[#parts+1] = tostring(D.cellsResolved) .. "S" end
   if D.packVoltageValid then parts[#parts+1] = string.format("%.1fV", D.voltage) end
   return #parts > 0 and table.concat(parts, " ") or "SMART FUEL"
