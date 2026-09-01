@@ -3,7 +3,7 @@ local G = {
   screenW=tonumber(LCD_W) or 800, screenH=tonumber(LCD_H) or 480,
   originX=0, originY=0, scaleX=1, scaleY=1, scaleMin=1,
   compact=false, compactJumboHero=false, largeScreen=false,
-  screen480x320=false, screen800x480=false,
+  screen480x320=false, screen480x272=false, screen800x480=false,
 }
 local SMLSIZE      = rawget(_G, "SMLSIZE")      or SMLSIZE      or 0
 local MIDSIZE      = rawget(_G, "MIDSIZE")      or MIDSIZE      or 0
@@ -67,6 +67,8 @@ G.configure = function(x, y, w, h)
   G.largeScreen = G.w >= 700 and G.h >= 420
   G.screen480x320 = G.screenW == 480 and G.screenH == 320
                       and G.w == 480 and G.h == 320
+  G.screen480x272 = G.screenW == 480 and G.screenH == 272
+                      and G.w == 480 and G.h == 272
   G.screen800x480 = G.screenW == 800 and G.screenH == 480
                       and G.w == 800 and G.h == 480
 
@@ -2953,7 +2955,10 @@ local function buildHero()
   newLabel(hb.x + G.x(14), hb.y + G.y(3), G.x(285),
            title, G.fontSmall, C_DIM)
   local rpmW = G.compact and G.x(250) or G.x(230)
-  V.rpm = newLabel(hb.x + G.x(14), hb.y + G.y(42), rpmW, "",
+  local rpmY = hb.y + G.y(42)
+  -- This optical correction is for TX16S MKII's exact 480x272 layout only.
+  if G.screen480x272 then rpmY = rpmY - 2 end
+  V.rpm = newLabel(hb.x + G.x(14), rpmY, rpmW, "",
                    G.fontHero, C_TEXT)
   local rx = hb.x + hb.w - G.x(14)
   if G.compact then
@@ -3014,6 +3019,9 @@ local function buildTile(x, y, w, h, label, unit)
       -- MIDSIZE is 24 px tall on this target. Center the value itself in the
       -- tile while leaving the compact caption and extrema footer anchored.
       valueY = y + math.floor((h - 24) / 2)
+    elseif G.screen480x272 then
+      -- Lower only the four live telemetry values by four physical pixels.
+      valueY = valueY + 4
     end
     return {
       value = newLabel(x + 2, valueY, w - 4, "",
