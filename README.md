@@ -212,7 +212,7 @@ To ensure the correct telemetry sensors are enabled, connect the flight controll
 ```text
 feature TELEMETRY
 set crsf_telemetry_mode = CUSTOM
-set telemetry_sensors = 43,60,61,89,88,93,15,3,4,5,6,7,8,95,96,97,90,91,92,99,42,46,50,17,18,19,20,21,22,23,24,25,27,28,30,31,32,33,41,36
+set telemetry_sensors = 43,60,61,89,88,93,15,3,4,5,6,7,8,95,96,97,90,91,92,99,42,46,50,17,18,19,20,21,22,23,24,25,27,28,30,31,32,33,41
 save
 ```
 
