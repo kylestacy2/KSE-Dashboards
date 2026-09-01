@@ -298,6 +298,10 @@ The filename must be exactly `default.png`; leaving the alternate image named `d
 | Model image is missing | Match the EdgeTX model name and `/IMAGES/` filename, including capitalization. |
 | Telemetry fields show `--` or `NO DATA` | Re-discover sensors and confirm the exact case-sensitive names above. If needed, try pasting the CLI command above for telemetry sensors. |
 
+## Acknowledgments
+
+Special thanks to Victor Malpica, Colin Bell, Martin Rottmair, and Tim Yantes for testing KSE4 and KSE5.
+
 ## Source and updates
 
 KSE4 and KSE5 are maintained together so functional and safety changes can be applied to both variants. The repository publishes readable Lua source rather than a precompiled radio-specific artifact.
