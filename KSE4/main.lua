@@ -367,7 +367,7 @@ local OPT = {
 -- runtime. FC is kept in one table both to make its lifecycle explicit and to
 -- stay below EdgeTX Lua's top-level local-variable limit.
 local FC = {
-  RADIO=1, ROTORFLIGHT=2, SIM_PREVIEW=3,
+  RADIO=1, ROTORFLIGHT=2,
   disarmStableTicks=150,
   confirmMaxReads=6,
   count=nil, status="RADIO", stale=false,
@@ -548,23 +548,14 @@ local function applyOptions(opts)
     if OPT.reservePct < 0 then OPT.reservePct = 0 end
     if OPT.reservePct > 50 then OPT.reservePct = 50 end
     OPT.battVoice   = (opts.BattVoice == 1 or opts.BattVoice == true)
-    -- Slot 10 used to be the SimTelem boolean. CountSrc keeps that slot and
-    -- folds preview into the same choice so the first nine persisted options
-    -- remain in place and the EdgeTX ten-option ceiling is respected.
+    -- CountSrc keeps slot 10 so the first nine persisted options remain in
+    -- place and the EdgeTX ten-option ceiling is respected.
     local countMode = tonumber(opts.CountSrc or opts["Flight Counter"])
-    if countMode == nil
-       and (opts.SimTelem == 1 or opts.SimTelem == true
-            or opts["Simulate Telemetry"] == 1
-            or opts["Simulate Telemetry"] == true) then
-      countMode = FC.SIM_PREVIEW
-    end
     if countMode ~= FC.RADIO
-       and countMode ~= FC.ROTORFLIGHT
-       and countMode ~= FC.SIM_PREVIEW then
+       and countMode ~= FC.ROTORFLIGHT then
       countMode = FC.ROTORFLIGHT
     end
     OPT.flightCounter = countMode
-    OPT.simTelemetry = countMode == FC.SIM_PREVIEW
     local parsedMin = parseVolt(opts.RxPackMin, nil)
     local parsedMax = parseVolt(opts.RxPackMax, nil)
     OPT.rxPackMin = parsedMin or 6.6
@@ -5426,7 +5417,7 @@ end
 -- from M1/M2 in the model name, and it has no tail-RPM telemetry source.
 -- CountSrc occupies slot 10 so the original nine saved option indices remain
 -- unchanged. Rotorflight FC is the default and reads command 14 through
--- RF Tool, and Sim Preview retains the isolated Companion display path.
+-- RF Tool.
 -- "Motor Switch" is a raw SOURCE so settings select the physical control (SG),
 -- not one of its individual position conditions (SG up/middle/down). A movement
 -- suppresses Electric/OMPHOBBY flight-pack alerts only after current aircraft
@@ -5450,7 +5441,7 @@ local options = {
       local info = type(getFieldInfo) == "function" and getFieldInfo("SG") or nil
       return type(info) == "table" and info.id or 0
     end)() },
-  { "CountSrc", CHOICE, 2, { "KSE Counter", "Rotorflight FC", "Sim Preview" } },
+  { "CountSrc", CHOICE, 2, { "KSE Counter", "Rotorflight FC" } },
 }
 local OPTION_LABELS = {
   TxBatt   = "TX Battery",

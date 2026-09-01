@@ -261,7 +261,7 @@ local timerThresholdArmed = nil
 -- RotorFlight's persistent FC statistics. Keeping the FC runtime in one table
 -- makes source changes explicit and avoids adding another telemetry transport.
 local FC = {
-  STACYDASH=1, ROTORFLIGHT=2, SIM_PREVIEW=3,
+  STACYDASH=1, ROTORFLIGHT=2,
   disarmStableTicks=150,
   confirmMaxReads=6,
   count=nil, status="STACYDASH", stale=false,
@@ -506,23 +506,16 @@ local function applyOptions(opts)
   OPT.bgTransparent = false
   OPT.themeName = themeNames[rawTheme] or "dark"
   applyTheme(OPT.themeName)
-  -- Slot 10 used to be SimTelem. CountSrc keeps that slot, folds preview into
-  -- the same choice, and preserves the first nine saved option positions.
+  -- CountSrc keeps slot 10 and preserves the first nine saved option
+  -- positions.
   local rawCounter = tonumber(opts and (opts.CountSrc
                                          or opts["Flight Counter"]))
-  if rawCounter == nil and opts
-     and (opts.SimTelem == 1 or opts.SimTelem == true
-          or opts["Simulate Telemetry"] == 1
-          or opts["Simulate Telemetry"] == true) then
-    rawCounter = FC.SIM_PREVIEW
-  end
   if rawCounter ~= FC.STACYDASH
-     and rawCounter ~= FC.ROTORFLIGHT
-     and rawCounter ~= FC.SIM_PREVIEW then
+     and rawCounter ~= FC.ROTORFLIGHT then
     rawCounter = FC.ROTORFLIGHT
   end
   OPT.flightCounter = rawCounter
-  OPT.simTelemetry = rawCounter == FC.SIM_PREVIEW
+  OPT.simTelemetry = false
   local rawBatt = tonumber(opts and opts.TxBatt) or 0
   txIsLiIon = (rawBatt == 2)
   local rawDur = tonumber(opts and (opts.MinFlight
@@ -5329,7 +5322,7 @@ local options = {
       return type(info) == "table" and info.id or 0
     end)() },
   { "CountSrc",  CHOICE, 2,
-    { "KSE Counter", "RotorFlight", "Sim Preview" } },
+    { "KSE Counter", "RotorFlight" } },
 }
 
 local OPTION_LABELS = {
